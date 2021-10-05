@@ -290,8 +290,11 @@ data(heights)</code></pre>
 </ol>
 <p>Answer: d. With the exception of 4 states, the murder rates are below 5 per 100,000.</p>
 <ol start="7" style="list-style-type: decimal">
-<li><p>Below is a histogram of male heights in our heights dataset:</p></li>
-<li><p>About what percentage are shorter than 60 inches?</p></li>
+<li>Below is a histogram of male heights in our heights dataset:</li>
+</ol>
+<p>Answer: c.34</p>
+<ol start="8" style="list-style-type: decimal">
+<li>About what percentage are shorter than 60 inches?</li>
 </ol>
 <p>Answer: a. 1%</p>
 <ol start="9" style="list-style-type: decimal">
@@ -311,7 +314,7 @@ data(heights)</code></pre>
 <p>For a list of numbers contained in a vector x, the average is defined as:</p>
 <pre class="r"><code>#m&lt;-sum(x)/length(x)</code></pre>
 <p>and the SD is defined as:</p>
-<pre class="r"><code>#s&lt;-sqrt(sum((x-mu)^2)/length(x))</code></pre>
+<pre class="r"><code>#s&lt;-sqrt(sum((x-m)^2)/length(x))</code></pre>
 <p>which can be interpreted as the average distance between values and their average.</p>
 <p>Let’s compute the values for the height for males which we will store in the object x:</p>
 <pre class="r"><code>index&lt;-heights$sex==&quot;Male&quot;
