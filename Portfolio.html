@@ -238,37 +238,63 @@ S1D_transcriptome&lt;-S1D_transcriptome%&gt;%
 <pre class="r"><code>## Boxplot of Stromal score
 box_stromal&lt;-S7C_ESTIMATE_scores%&gt;%
   ggplot(aes(`Proteomic subtype`,`Stromal Score`,fill=`Proteomic subtype`))+
-  geom_boxplot(show.legend = FALSE)+
+  geom_boxplot(show.legend = FALSE )+
   labs(title=&quot;&quot;,
        x=&quot;&quot;,
        y=&quot;Stromal Score&quot;)+
-  facet_wrap(~`Cell type`,labeller = label_both,ncol=1)
+  facet_wrap(~`Cell type`,labeller = label_both,ncol=1)+
+  coord_flip()
 
 ## Boxplot of Immune score
 box_immune&lt;-S7C_ESTIMATE_scores%&gt;%
   ggplot(aes(`Proteomic subtype`,`Immune Score`,fill=`Proteomic subtype`))+
-  geom_boxplot(show.legend = FALSE)+
+  geom_boxplot()+
+  theme(legend.position = &quot;top&quot;)+
   labs(x=&quot;&quot;,
        y=&quot;Immune Score&quot;)+  
-  facet_wrap(~`Cell type`,labeller = label_both,ncol=1)
+  facet_wrap(~`Cell type`,labeller = label_both,ncol=1)+
+  coord_flip()
 
 ## Density ridge plot of EMT-TFs (SNAI1, SNAI2, CDH1, ZEB1, ZEB2)
-density_gene&lt;-S1D_transcriptome%&gt;%
+density_gene_1&lt;-S1D_transcriptome%&gt;%
+  filter(`Proteomic subtype`==1)%&gt;%
   mutate(gene=as.factor(gene))%&gt;%
   ggplot(aes(Log2TN,gene,fill=stat(x)))+
   xlim(c(-5,5))+
   geom_density_ridges_gradient(show.legend = FALSE)+
-  scale_fill_gradient2(low = &quot;blue&quot;, mid= &quot;white&quot;, high = &quot;red&quot;)+
+  scale_fill_gradient2(low = &quot;white&quot;, high = &quot;#F8766D&quot;)+
   labs(x=&quot;Log2TN&quot;,
-       y=&quot;&quot;)+
-  facet_wrap(~`Proteomic subtype`,labeller=label_both,ncol=1)
+       y=&quot;&quot;)
 
-## Make Multi-panel plot
-box_figure1&lt;-plot_grid(box_stromal,box_immune,ncol=1)
-Figure1&lt;-plot_grid(box_figure1,density_gene,ncol=2,labels = &quot;AUTO&quot;)</code></pre>
-<pre><code>## Picking joint bandwidth of 0.475</code></pre>
-<pre><code>## Picking joint bandwidth of 0.6</code></pre>
+density_gene_2&lt;-S1D_transcriptome%&gt;%
+  filter(`Proteomic subtype`==2)%&gt;%
+  mutate(gene=as.factor(gene))%&gt;%
+  ggplot(aes(Log2TN,gene,fill=stat(x)))+
+  xlim(c(-5,5))+
+  geom_density_ridges_gradient(show.legend = FALSE)+
+  theme(axis.title.x = element_blank())+
+  scale_fill_gradient2(low = &quot;white&quot;, high = &quot;#00BA38&quot;)+
+  labs(x=&quot;Log2TN&quot;,
+       y=&quot;&quot;)
+
+density_gene_3&lt;-S1D_transcriptome%&gt;%
+  filter(`Proteomic subtype`==3)%&gt;%
+  mutate(gene=as.factor(gene))%&gt;%
+  ggplot(aes(Log2TN,gene,fill=stat(x)))+
+  xlim(c(-5,5))+
+  geom_density_ridges_gradient(show.legend = FALSE)+
+  theme(axis.title.x = element_blank())+
+  scale_fill_gradient2(low = &quot;white&quot;, high = &quot;#619CFF&quot;)+
+  labs(x=&quot;Log2TN&quot;,
+       y=&quot;&quot;)
+density_gene&lt;-plot_grid(density_gene_3,density_gene_2,density_gene_1,ncol=1)</code></pre>
 <pre><code>## Picking joint bandwidth of 0.493</code></pre>
+<pre><code>## Picking joint bandwidth of 0.6</code></pre>
+<pre><code>## Picking joint bandwidth of 0.475</code></pre>
+<pre class="r"><code>## Make Multi-panel plot
+box_figure1&lt;-plot_grid(box_stromal,box_immune,ncol=1)
+Figure1&lt;-plot_grid(box_figure1,density_gene,ncol=2,labels=c(&quot;A. Stromal/Immune Score by Proteomic subtype&quot;,&quot;B. Enrichment of EMT-TFs by Proteomic subtype&quot;))
+ggsave(&quot;Figure1.pdf&quot;,Figure1,width = 16, height = 9)</code></pre>
 <p>Plot “A” is stromal/immune score of tumor/normal tissue box plot for each proteomic type. Both Stromal score and Immune score, Normal cell type get high score compared to Tumor cell type. In addition, there was little difference in scores for each prototype in the Normal cell type, but the difference in mean and distribution for each prototype was clear in the Tumor cell type. It was interpreted that this indicates that there is a difference in the phenotype of Tumor tissue’s stromal cell and immune cell according to the proteomic type.</p>
 <p>Plot “B” is transcriptome_Log2TN value of EMT-TFs for each proteomic type. I expected that in Tumor cell, EMT, the first step of invision and metastasis, is activated and many EMT-FTs are expressed, resulting in low expression of CDH1, the phenotype of epithial cell. However, the opposite result came out and I failed to explain the result from a tumor cascade perspective.</p>
 </div>
@@ -329,10 +355,12 @@ heatmap_MMP&lt;-data%&gt;%
   geom_xsidetile(aes(xfill=`Proteomic subtype`),show.legend = FALSE)+
   scale_xfill_manual(values = c(&quot;#F8766D&quot;,&quot;#7CAE00&quot;,&quot;#00BFC4&quot;))+
   theme_classic()+
+  labs(x=&quot;MMP related Modules&quot;)+
   theme(axis.text.x = element_blank(),
-        axis.text.y = element_blank())+
-  labs(x=&quot;&quot;,
-       y=&quot;MMP related Modules&quot;)
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank())
 
 heatmap_ECM&lt;-data%&gt;%
   filter(Module%in%Module_ECM)%&gt;%
@@ -343,10 +371,12 @@ heatmap_ECM&lt;-data%&gt;%
   geom_xsidetile(aes(xfill=`Proteomic subtype`),show.legend = FALSE)+
   scale_xfill_manual(values = c(&quot;#F8766D&quot;,&quot;#7CAE00&quot;,&quot;#00BFC4&quot;))+
   theme_classic()+
+  labs(x=&quot;ECM related Modules&quot;)+
   theme(axis.text.x = element_blank(),
-        axis.text.y = element_blank())+
-  labs(x=&quot;&quot;,
-       y=&quot;ECM related Modules&quot;)
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank())
 
 heatmap_vesicle&lt;-data%&gt;%
   filter(Module%in%Module_vesicle)%&gt;%
@@ -357,12 +387,15 @@ heatmap_vesicle&lt;-data%&gt;%
   geom_xsidetile(aes(xfill=`Proteomic subtype`),show.legend = FALSE)+
   scale_xfill_manual(values =c(&quot;#F8766D&quot;,&quot;#7CAE00&quot;,&quot;#00BFC4&quot;))+  
   theme_classic()+
+  labs(x=&quot;vesicle related Modules&quot;)+
   theme(axis.text.x = element_blank(),
-        axis.text.y = element_blank())+
-  labs(x=&quot;&quot;,
-       y=&quot;vesicle related Modules&quot;,size=10)
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank())
 
-heatmap_all&lt;-data%&gt;%
+heatmap_others&lt;-data%&gt;%
+  filter(Module%in%c(Module_MMP,Module_ECM,Module_vesicle)==FALSE)%&gt;%
   mutate(Log2TN=as.numeric(Log2TN))%&gt;%
   ggplot(aes(x=reorder(ID,Log2TN),y=Module,fill=Log2TN))+
   geom_tile(show.legend = FALSE)+
@@ -370,68 +403,67 @@ heatmap_all&lt;-data%&gt;%
   geom_xsidetile(aes(xfill=`Proteomic subtype`),show.legend = FALSE)+
   scale_xfill_manual(values =c(&quot;#F8766D&quot;,&quot;#7CAE00&quot;,&quot;#00BFC4&quot;))+
   theme_classic()+
+  labs(x=&quot;other Modules&quot;)+
   theme(axis.text.x = element_blank(),
-        axis.text.y = element_blank())+
-  labs(x=&quot;&quot;,
-       y=&quot;All Module&quot;)</code></pre>
+        axis.text.y = element_blank(),
+        axis.title.y = element_blank(),
+        axis.ticks.x = element_blank(),
+        axis.ticks.y = element_blank())
+
+heatmap&lt;-plot_grid(heatmap_MMP,heatmap_ECM,heatmap_vesicle,heatmap_others,nrow = 1)</code></pre>
 <pre class="r"><code>#density_ridges
-density_MMP&lt;-data%&gt;%
-  filter(Module%in%Module_MMP)%&gt;%
+density&lt;-data%&gt;%
   mutate(Log2TN=as.numeric(Log2TN),
-         `Proteomic subtype`=as.factor(`Proteomic subtype`))%&gt;%
-  ggplot(aes(x=Log2TN,`Proteomic subtype`,fill=stat(x)))+
-  geom_density_ridges_gradient(show.legend = FALSE)+
-  scale_fill_gradient2(low = &quot;blue&quot;, mid= &quot;white&quot;, high = &quot;red&quot;)+
-  scale_x_continuous(limit=c(-0.5,0.5))+
-  labs(x=&quot;&quot;,
-       y=&quot;MMP&quot;)  
+         gene_related=case_when(Module%in%Module_MMP~&quot;MMP&quot;,
+                                Module%in%Module_ECM~&quot;ECM&quot;,
+                                Module%in%Module_vesicle~&quot;vesicle&quot;,
+                                TRUE~&quot;others&quot;))%&gt;%
+  ggplot(aes(x=Log2TN,y=factor(`gene_related`,level=c(&quot;others&quot;,&quot;vesicle&quot;,&quot;ECM&quot;,&quot;MMP&quot;)),fill=`Proteomic subtype`))+
+  geom_density_ridges_gradient()+
+  scale_x_continuous(limits = c(-0.5,0.5))+
+  labs(y=&quot;&quot;)+
+  facet_wrap(~`Proteomic subtype`)
 
-density_ECM&lt;-data%&gt;%
-  filter(Module%in%Module_ECM)%&gt;%
+Figure2&lt;-plot_grid(density,heatmap,ncol=1,labels =c(&quot;A. Enrichment of Modules by Proteomic subtypes&quot;,&quot;B. Enrichment of Modules&quot;))</code></pre>
+<pre><code>## Picking joint bandwidth of 0.0204</code></pre>
+<pre><code>## Picking joint bandwidth of 0.0284</code></pre>
+<pre><code>## Picking joint bandwidth of 0.0269</code></pre>
+<pre class="r"><code>ggsave(&quot;Figure2.pdf&quot;,Figure2,width = 16, height = 9)</code></pre>
+<p>Plot A is density ridge plots about enrichment of specific modules by each proteomic subtype. MMP and ECM-related Modules tended to be low-expression overall, especially in proteomic subtype 2. However, the vessel did not, and rather showed a tendency to overexpression, likewise clearly in proteomic subtype 2. Plot B is heatmap about specific modules and added a sidetile showing proteomic subtypes. Since identical data was used, the information available from the plot was the same, but it was not clear except for MMP-related modules.</p>
+<p>#Figure3 (Supplement plot)</p>
+<p>From the peer review midterm exam, I received several feedbacks about my portpolio. The overall content of the feedback was well visualized because the plots were well divided by color, but the label was not given next to the graph, so there was an inconvenience of having to watch while comparing it with the text. Contrary to the expectation that CHD1 by ZEB1/2 and SNAI1/2 would be inhibited like metastasis phenotype in the “Enrichment of EMT-TFs by Proteomic subtype” of Figure 1, the opposite result was obtained. I referred to the Feedback for what caused this, and I thought that the adenocarcinoma of the corresponding cohorts may be the stage of tumor progression, not metastasis phenotype. So, I checked whether it was because metastasis phenotype did not appear on the early stage and metastasis phenotype appeared on the late stage to transfer to another institution.</p>
+</div>
+<div id="converting-data-2" class="section level2">
+<h2>Converting data</h2>
+<p>Patient-specific stage information was added to the data used in Figure 1 and used.</p>
+<pre class="r"><code>S1A_clinical_103patient&lt;-read_excel(&quot;1-s2.0-S0092867420307431-mmc1.xlsx&quot;, sheet = 2,na=&quot;NA&quot;)
+  
+sup_data&lt;-merge(S1D_transcriptome,S1A_clinical_103patient%&gt;%select(ID,Stage),by=&quot;ID&quot;)</code></pre>
+</div>
+<div id="visualization-2" class="section level2">
+<h2>Visualization</h2>
+<pre class="r"><code>Figure3&lt;-sup_data%&gt;%
   mutate(Log2TN=as.numeric(Log2TN),
-         `Proteomic subtype`=as.factor(`Proteomic subtype`))%&gt;%
-  ggplot(aes(x=Log2TN,`Proteomic subtype`,fill=stat(x)))+
-  geom_density_ridges_gradient(show.legend = FALSE)+
-  scale_fill_gradient2(low = &quot;blue&quot;, mid= &quot;white&quot;, high = &quot;red&quot;)+
-  scale_x_continuous(limit=c(-0.5,0.5))+
-  labs(x=&quot;&quot;,
-       y=&quot;ECM&quot;) 
+         Stage=case_when(Stage%in%c(&quot;IA&quot;,&quot;IB&quot;)~&quot;I&quot;,
+                         Stage%in%c(&quot;IIA&quot;,&quot;IIB&quot;)~&quot;II&quot;,
+                         TRUE~&quot;overIII&quot;))%&gt;%
+  ggplot(aes(Log2TN,fill=gene))+
+  geom_boxplot()+
+  xlim(c(-3,3))+
+  coord_flip()+
+  facet_wrap(gene~Stage,ncol = 3)+
+  theme()+
+  ggtitle(&quot;Figure3. Enrichment of EMT-TFs genes by Tumor Stage&quot;)
 
-density_vesicle&lt;-data%&gt;%
-  filter(Module%in%Module_vesicle)%&gt;%
-  mutate(Log2TN=as.numeric(Log2TN),
-         `Proteomic subtype`=as.factor(`Proteomic subtype`))%&gt;%
-  ggplot(aes(x=Log2TN,`Proteomic subtype`,fill=stat(x)))+
-  geom_density_ridges_gradient(show.legend = FALSE)+
-  scale_fill_gradient2(low = &quot;blue&quot;, mid= &quot;white&quot;, high = &quot;red&quot;)+
-  scale_x_continuous(limit=c(-0.5,0.5))+
-  labs(x=&quot;&quot;,
-       y=&quot;vesicle&quot;) 
-
-density_all&lt;-data%&gt;%
-  mutate(Log2TN=as.numeric(Log2TN),
-         `Proteomic subtype`=as.factor(`Proteomic subtype`))%&gt;%
-  ggplot(aes(x=Log2TN,`Proteomic subtype`,fill=stat(x)))+
-  geom_density_ridges_gradient(show.legend = FALSE)+
-  scale_fill_gradient2(low = &quot;blue&quot;, mid= &quot;white&quot;, high = &quot;red&quot;)+
-  scale_x_continuous(limit=c(-0.5,0.5))+
-  labs(x=&quot;&quot;,
-       y=&quot;All&quot;) 
-
-Figure2&lt;-plot_grid(density_MMP,density_ECM,density_vesicle,density_all,
-          heatmap_MMP,heatmap_ECM,heatmap_vesicle,heatmap_all,nrow=2,
-          labels = &quot;AUTO&quot;)</code></pre>
-<pre><code>## Picking joint bandwidth of 0.027</code></pre>
-<pre><code>## Picking joint bandwidth of 0.0247</code></pre>
-<pre><code>## Picking joint bandwidth of 0.027</code></pre>
-<pre><code>## Picking joint bandwidth of 0.0179</code></pre>
-<p>Plot A~D are density ridge plots about specific modules of each proteomic subtype. MMP and ECM-related Modules tended to be low-expression overall, especially in proteomic subtype 2. However, the vessel did not, and rather showed a tendency to overexpression, likewise clearly in proteomic subtype 2. Plot E~F are heatmap about specific modules of each proteomic subtype. Sidetile above the heatmap shows the proteomic subtype(Red-1,Green-2,Blue-3). Since identical data was used, the information available from the plot was the same, but it was not clear except for MMP-related modules.</p>
+ggsave(&quot;Figure3.pdf&quot;,Figure3,width = 9, height = 16)</code></pre>
+<pre><code>## Warning: Removed 26 rows containing non-finite values (stat_boxplot).</code></pre>
 </div>
 </div>
 <div id="discussion" class="section level1">
 <h1>Discussion</h1>
-<p>From Figure 1, I found that Tumor cells have lower Stromal score and Immune score than Normal cells, showing different distribution patterns about each protein subtype.This means that the stromal and immune score can be a specific feature of the protein subtype. In addition, the expression of CDH1, which is epitherial cell phenotype, was high, and the expression of ZEB1/2 and SNAI1/2 that hinder CDH was low. It was a different result from the theory that tumor cell should have motility and invasiveness which is mesenchymal cell phenotype, and the interpretation of this results need more discussion.</p>
-<p>From Figure 2, enrichment for each proteomic type of characteristic modules is expressed in two ways, density ridge plot and heatmap.It could be observed that protomic type 2 was significantly less expressed in MMP/ECM-related modules.</p>
+<p>From Figure 1, I found that Tumor cells have lower Stromal score and Immune score than Normal cells, showing different distribution patterns about each protein subtype.This means that the stromal and immune score can be a specific feature of the protein subtype. In addition, the expression of CDH1, which is epitherial cell phenotype, was high, and the expression of ZEB1/2 and SNAI1/2 that hinder CDH was low. At first, I thought that it was a different result from the theory that tumor cell should have motility and invasiveness which is mesenchymal cell phenotype. After receiving feedback from fellows, I thought that the tissue that obtained the data might not have metastasis phenotype yet because the tumor is still have to grow. In fact, if you look at the clinical data of patients, you can see that there are many stage-1 patients with less cancer progression.</p>
+<p>From Figure 2, enrichment for each proteomic type of characteristic modules is expressed in two ways, density ridge plot and heatmap.It could be observed that protomic type 2 shows the significant results, relatively low enrichment on modules related to MMP and ECM.</p>
+<p>Figure 3 shows the expression of CDH1, SNAI1, SNAI2, ZEB1, and ZEB2 genes by stage. Most of the cohort in this paper are early stage tumor patients of the I and II phases, so they were divided by stage to verify whether a metastatic phenotype was not shown. However, the number of patients above the stage III is remarkably small, so it does not seem to show significant statistical results. Looking at the enrichment of the patients in stageI and 2 in SNAI1 and SNAI2, it shows a tendency to be consistent with the previous hypothesis. However, it is regrettable that a meaningful conclusion can be reached only when there is a comparison with general tumor or later stage patients.</p>
 </div>
 
 
